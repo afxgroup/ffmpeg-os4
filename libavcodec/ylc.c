@@ -50,14 +50,14 @@ static av_cold int decode_init(AVCodecContext *avctx)
     return 0;
 }
 
-typedef struct Node {
+typedef struct _Node {
     int16_t  sym;
     uint32_t count;
     int16_t  l, r;
-} Node;
+} _Node;
 
 static void get_tree_codes(uint32_t *bits, int16_t *lens, uint8_t *xlat,
-                           Node *nodes, int node,
+                           _Node *nodes, int node,
                            uint32_t pfx, int pl, int *pos)
 {
     int s;
@@ -81,7 +81,7 @@ static void get_tree_codes(uint32_t *bits, int16_t *lens, uint8_t *xlat,
 
 static int build_vlc(AVCodecContext *avctx, VLC *vlc, const uint32_t *table)
 {
-    Node nodes[512];
+    _Node nodes[512];
     uint32_t bits[256];
     int16_t lens[256];
     uint8_t xlat[256];

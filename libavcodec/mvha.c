@@ -44,15 +44,15 @@ typedef struct MVHAContext {
     LLVidDSPContext   llviddsp;
 } MVHAContext;
 
-typedef struct Node {
+typedef struct _Node {
     int16_t  sym;
     int16_t  n0;
     int16_t  l, r;
     uint32_t count;
-} Node;
+} _Node;
 
 static void get_tree_codes(uint32_t *bits, int16_t *lens, uint8_t *xlat,
-                           Node *nodes, int node,
+                           _Node *nodes, int node,
                            uint32_t pfx, int pl, int *pos)
 {
     int s;
@@ -77,7 +77,7 @@ static void get_tree_codes(uint32_t *bits, int16_t *lens, uint8_t *xlat,
 static int build_vlc(AVCodecContext *avctx, VLC *vlc)
 {
     MVHAContext *s = avctx->priv_data;
-    Node nodes[512];
+    _Node nodes[512];
     uint32_t bits[256];
     int16_t lens[256];
     uint8_t xlat[256];

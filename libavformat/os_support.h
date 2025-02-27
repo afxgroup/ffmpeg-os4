@@ -40,6 +40,10 @@
 #endif
 #endif
 
+#ifdef __amigaos4__
+#include <string.h>
+#endif
+
 #ifdef _WIN32
 #  include <fcntl.h>
 #  include <stdint.h>
@@ -99,6 +103,10 @@ static inline int is_dos_path(const char *path)
 {
 #if HAVE_DOS_PATHS
     if (path[0] && path[1] == ':')
+        return 1;
+#elif defined(__amigaos4__)
+    // Assume that an url with : is always followed by at least two slashes
+    if (!(strstr(path, "://") != NULL))
         return 1;
 #endif
     return 0;

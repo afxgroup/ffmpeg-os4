@@ -60,6 +60,21 @@ typedef HRESULT (WINAPI *PFN_CREATE_DXGI_FACTORY)(REFIID riid, void **ppFactory)
 #include "pixdesc.h"
 #include "pixfmt.h"
 
+#ifdef __amigaos4__
+#include <va/va.h>
+#include <va/va_amigaos.h>
+#include <va/va_str.h>
+#define __USE_INLINE__ // So we can use va*() functions without needing IVA->
+#include <proto/exec.h>
+#include <proto/VA.h>
+
+#ifndef HAVE_VAAPI_OS4
+    #define HAVE_VAAPI_OS4 1
+#endif
+
+struct Library *VABase = NULL;
+struct VAIFace *IVA = NULL;
+#endif
 
 typedef struct VAAPIDevicePriv {
 #if HAVE_VAAPI_X11
@@ -286,6 +301,7 @@ static int vaapi_frames_get_constraints(AVHWDeviceContext *hwdev,
                 break;
             }
         }
+
         if (pix_fmt_count == 0) {
             // Nothing usable found.  Presumably there exists something which
             // works, so leave the set null to indicate unknown.
@@ -393,16 +409,35 @@ static int vaapi_device_init(AVHWDeviceContext *hwdev)
     enum AVPixelFormat pix_fmt;
     unsigned int fourcc;
 
+#ifdef __amigaos4__
+    if (VABase == NULL) {
+        VABase = OpenLibrary("va.library", 0);
+        if (!VABase) {
+            av_log(ctx, AV_LOG_ERROR, "Cannot open va.library.\n");
+            return AVERROR_UNKNOWN;
+        }
+        IVA = (struct VAIFace *) GetInterface((struct Library *)VABase, "main", 1, NULL);
+        if (!IVA) {
+            av_log(ctx, AV_LOG_ERROR, "Cannot get va interface.\n");
+            CloseLibrary(VABase);
+            VABase = NULL;
+            return AVERROR_UNKNOWN;
+        }
+    }
+#endif
+
     image_count = vaMaxNumImageFormats(hwctx->display);
     if (image_count <= 0) {
         err = AVERROR(EIO);
         goto fail;
     }
+
     image_list = av_malloc(image_count * sizeof(*image_list));
     if (!image_list) {
         err = AVERROR(ENOMEM);
         goto fail;
     }
+
     vas = vaQueryImageFormats(hwctx->display, image_list, &image_count);
     if (vas != VA_STATUS_SUCCESS) {
         err = AVERROR(EIO);
@@ -414,6 +449,7 @@ static int vaapi_device_init(AVHWDeviceContext *hwdev)
         err = AVERROR(ENOMEM);
         goto fail;
     }
+
     ctx->nb_formats = 0;
     for (i = 0; i < image_count; i++) {
         fourcc  = image_list[i].fourcc;
@@ -475,6 +511,17 @@ fail:
 static void vaapi_device_uninit(AVHWDeviceContext *hwdev)
 {
     VAAPIDeviceContext *ctx = hwdev->internal->priv;
+
+#ifdef __amigaos4__
+    if (VABase) {
+        CloseLibrary(VABase);
+        VABase = NULL;
+    }
+    if (IVA) {
+        DropInterface((struct Interface *) IVA);
+        IVA = NULL;
+    }
+#endif
 
     av_freep(&ctx->formats);
 }
@@ -912,6 +959,7 @@ static int vaapi_map_frame(AVHWFramesContext *hwfc,
     return 0;
 
 fail:
+
     if (map) {
         if (address)
             vaUnmapBuffer(hwctx->display, map->image.buf);
@@ -1672,7 +1720,7 @@ static int vaapi_device_create(AVHWDeviceContext *ctx, const char *device,
     VAAPIDevicePriv *priv;
     VADisplay display = NULL;
     const AVDictionaryEntry *ent;
-    int try_drm, try_x11, try_win32, try_all;
+    int try_drm, try_x11, try_win32, try_os4, try_all;
 
     priv = av_mallocz(sizeof(*priv));
     if (!priv)
@@ -1692,6 +1740,8 @@ static int vaapi_device_create(AVHWDeviceContext *ctx, const char *device,
             try_x11 = 1;
         } else if (!strcmp(ent->value, "win32")) {
             try_win32 = 1;
+        } else if (!strcmp(ent->value, "os4")) {
+            try_os4 = 1;
         } else {
             av_log(ctx, AV_LOG_ERROR, "Invalid connection type %s.\n",
                    ent->value);
@@ -1702,6 +1752,7 @@ static int vaapi_device_create(AVHWDeviceContext *ctx, const char *device,
         try_drm = HAVE_VAAPI_DRM;
         try_x11 = HAVE_VAAPI_X11;
         try_win32 = HAVE_VAAPI_WIN32;
+        try_os4 = HAVE_VAAPI_OS4;
     }
 
 #if HAVE_VAAPI_DRM
@@ -1868,6 +1919,32 @@ static int vaapi_device_create(AVHWDeviceContext *ctx, const char *device,
 
         av_log(ctx, AV_LOG_VERBOSE, "Opened VA display via "
                 "Win32 display.\n");
+    }
+#endif
+
+#if HAVE_VAAPI_OS4
+    if (!display && try_os4) {
+        if (VABase == NULL) {
+            VABase = OpenLibrary("va.library", 0);
+            if (!VABase) {
+                av_log(ctx, AV_LOG_ERROR, "Cannot open va.library.\n");
+                return AVERROR_UNKNOWN;
+            }
+            IVA = (struct VAIFace *) GetInterface((struct Library *)VABase, "main", 1, NULL);
+            if (!IVA) {
+                av_log(ctx, AV_LOG_ERROR, "Cannot get va interface.\n");
+                CloseLibrary(VABase);
+                VABase = NULL;
+                return AVERROR_UNKNOWN;
+            }
+        }
+        display = vaGetDisplay(NULL);
+        if (!display) {
+            av_log(ctx, AV_LOG_ERROR, "Cannot open a VA display from AmigaOS4 display.\n");
+            return AVERROR_UNKNOWN;
+        }
+
+        av_log(ctx, AV_LOG_VERBOSE, "Opened VA display via AmigaOS4 display.\n");
     }
 #endif
 

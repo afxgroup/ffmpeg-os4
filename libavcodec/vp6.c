@@ -260,14 +260,14 @@ static void vp6_parse_vector_models(VP56Context *s)
 /* nodes must ascend by count, but with descending symbol order */
 static int vp6_huff_cmp(const void *va, const void *vb)
 {
-    const Node *a = va, *b = vb;
+    const _Node *a = va, *b = vb;
     return (a->count - b->count)*16 + (b->sym - a->sym);
 }
 
 static int vp6_build_huff_tree(VP56Context *s, uint8_t coeff_model[],
                                const uint8_t *map, unsigned size, VLC *vlc)
 {
-    Node nodes[2*VP6_MAX_HUFF_SIZE], *tmp = &nodes[size];
+    _Node nodes[2*VP6_MAX_HUFF_SIZE], *tmp = &nodes[size];
     int a, b, i;
 
     /* first compute probabilities from model */

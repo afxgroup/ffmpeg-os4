@@ -80,7 +80,7 @@ static av_cold int decode_init(AVCodecContext *avctx)
  */
 static int huff_cmp(const void *va, const void *vb)
 {
-    const Node *a = va, *b = vb;
+    const _Node *a = va, *b = vb;
     return (a->count - b->count)*256 + a->sym - b->sym;
 }
 
@@ -94,7 +94,7 @@ static int fraps2_decode_plane(FrapsContext *s, uint8_t *dst, int stride, int w,
     int i, j, ret;
     GetBitContext gb;
     VLC vlc;
-    Node nodes[512];
+    _Node nodes[512];
 
     for (i = 0; i < 256; i++)
         nodes[i].count = bytestream_get_le32(&src);

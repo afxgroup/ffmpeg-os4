@@ -116,7 +116,7 @@ end:
 }
 
 static void get_tree_codes(uint32_t *bits, int16_t *lens, uint8_t *xlat,
-                           Node *nodes, int node,
+                           _Node *nodes, int node,
                            uint32_t pfx, int pl, int *pos, int no_zero_count)
 {
     int s;
@@ -138,7 +138,7 @@ static void get_tree_codes(uint32_t *bits, int16_t *lens, uint8_t *xlat,
     }
 }
 
-static int build_huff_tree(VLC *vlc, Node *nodes, int head, int flags, int nb_bits)
+static int build_huff_tree(VLC *vlc, _Node *nodes, int head, int flags, int nb_bits)
 {
     int no_zero_count = !(flags & FF_HUFFMAN_FLAG_ZERO_COUNT);
     uint32_t bits[256];
@@ -157,7 +157,7 @@ static int build_huff_tree(VLC *vlc, Node *nodes, int head, int flags, int nb_bi
  * first nb_codes nodes.count must be set
  */
 int ff_huff_build_tree(void *logctx, VLC *vlc, int nb_codes, int nb_bits,
-                       Node *nodes, HuffCmp cmp, int flags)
+                       _Node *nodes, HuffCmp cmp, int flags)
 {
     int i, j;
     int cur_node;
@@ -175,7 +175,7 @@ int ff_huff_build_tree(void *logctx, VLC *vlc, int nb_codes, int nb_bits,
                "Tree construction is not possible\n");
         return -1;
     }
-    AV_QSORT(nodes, nb_codes, Node, cmp);
+    AV_QSORT(nodes, nb_codes, _Node, cmp);
     cur_node = nb_codes;
     nodes[nb_codes*2-1].count = 0;
     for (i = 0; i < nb_codes * 2 - 1; i += 2) {

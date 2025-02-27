@@ -5599,6 +5599,10 @@ case $target_os in
     dragonfly)
         disable symver
         ;;
+    amigaos4)
+        add_cppflags -mcrt=clib2 -mstrict-align -gstabs 
+        add_ldflags -mcrt=clib2 -athread=native
+        ;;
     freebsd)
         ;;
     bsd/os)
@@ -6907,11 +6911,11 @@ if enabled gcrypt; then
 fi
 
 if enabled sdl2; then
-    SDL2_CONFIG="${cross_prefix}sdl2-config"
+    SDL2_CONFIG="/usr/ppc-amigaos/SDK/local/clib2/bin/sdl2-config"
     test_pkg_config sdl2 "sdl2 >= 2.0.1 sdl2 < 3.0.0" SDL_events.h SDL_PollEvent
     if disabled sdl2 && "${SDL2_CONFIG}" --version > /dev/null 2>&1; then
         sdl2_cflags=$("${SDL2_CONFIG}" --cflags)
-        sdl2_extralibs=$("${SDL2_CONFIG}" --libs)
+        sdl2_extralibs=$("${SDL2_CONFIG}" --static-libs)
         test_cpp_condition SDL.h "(SDL_MAJOR_VERSION<<16 | SDL_MINOR_VERSION<<8 | SDL_PATCHLEVEL) >= 0x020001" $sdl2_cflags &&
         test_cpp_condition SDL.h "(SDL_MAJOR_VERSION<<16 | SDL_MINOR_VERSION<<8 | SDL_PATCHLEVEL) < 0x030000" $sdl2_cflags &&
         check_func_headers SDL_events.h SDL_PollEvent $sdl2_extralibs $sdl2_cflags &&
@@ -7062,8 +7066,8 @@ enabled uwp && mediafoundation_extralibs="-lmfplat -lmfuuid -lole32 -lstrmiids" 
 enabled libdrm &&
     check_pkg_config libdrm_getfb2 libdrm "xf86drmMode.h" drmModeGetFB2
 
-enabled vaapi &&
-    check_pkg_config vaapi "libva >= 0.35.0" "va/va.h" vaInitialize
+#enabled vaapi &&
+#    check_pkg_config vaapi "libva >= 0.35.0" "va/va.h" vaInitialize
 
 if enabled vaapi; then
     case $target_os in

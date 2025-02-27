@@ -23,6 +23,15 @@
 
 #include <va/va.h>
 
+#ifdef __amigaos4__
+#include <va/va.h>
+#include <va/va_amigaos.h>
+#include <va/va_str.h>
+#define __USE_INLINE__ // So we can use va*() functions without needing IVA->
+#include <proto/exec.h>
+#include <proto/VA.h>
+#endif
+
 #if VA_CHECK_VERSION(1, 0, 0)
 #include <va/va_str.h>
 #endif

@@ -1907,7 +1907,7 @@ rc_mode_found:
 
 static av_cold int vaapi_encode_init_max_frame_size(AVCodecContext *avctx)
 {
-#if VA_CHECK_VERSION(1, 5, 0)
+#if VA_CHECK_VERSION(1, 5, 1)
     VAAPIEncodeContext  *ctx = avctx->priv_data;
     VAConfigAttrib      attr = { VAConfigAttribMaxFrameSize };
     VAStatus vas;

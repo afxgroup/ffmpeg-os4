@@ -30,11 +30,11 @@
 
 #include "vlc.h"
 
-typedef struct Node {
+typedef struct _Node {
     int16_t  sym;
     int16_t  n0;
     uint32_t count;
-} Node;
+} _Node;
 
 #define FF_HUFFMAN_FLAG_HNODE_FIRST 0x01
 #define FF_HUFFMAN_FLAG_ZERO_COUNT  0x02
@@ -42,7 +42,7 @@ typedef struct Node {
 
 typedef int (*HuffCmp)(const void *va, const void *vb);
 int ff_huff_build_tree(void *logctx, VLC *vlc, int nb_codes, int nb_bits,
-                       Node *nodes, HuffCmp cmp, int flags);
+                       _Node *nodes, HuffCmp cmp, int flags);
 
 int ff_huff_gen_len_table(uint8_t *dst, const uint64_t *stats, int n, int skip0);
 

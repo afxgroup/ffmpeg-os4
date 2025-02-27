@@ -893,13 +893,12 @@ static int decode_inter(AVCodecContext *avctx, GetBitContext *gb,
 
     return 0;
 }
-
-typedef struct Node {
+typedef struct _Node {
     int parent;
     int child[2];
-} Node;
+} _Node;
 
-static void get_tree_codes(uint32_t *codes, Node *nodes, int idx, uint32_t pfx, int bitpos)
+static void get_tree_codes(uint32_t *codes, _Node *nodes, int idx, uint32_t pfx, int bitpos)
 {
     if (idx < 256 && idx >= 0) {
         codes[idx] = pfx;
@@ -914,7 +913,7 @@ static int make_new_tree(const uint8_t *bitlens, uint32_t *codes)
     int zlcount = 0, curlen, idx, nindex, last, llast;
     int blcounts[32] = { 0 };
     int syms[8192];
-    Node nodes[512];
+    _Node nodes[512];
     int node_idx[1024];
     int old_idx[512];
 

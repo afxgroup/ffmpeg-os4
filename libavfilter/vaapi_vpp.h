@@ -22,6 +22,15 @@
 #include <va/va.h>
 #include <va/va_vpp.h>
 
+#ifdef __amigaos4__
+#include <va/va.h>
+#include <va/va_amigaos.h>
+#include <va/va_str.h>
+#define __USE_INLINE__ // So we can use va*() functions without needing IVA->
+#include <proto/exec.h>
+#include <proto/VA.h>
+#endif
+
 #include "libavutil/hwcontext.h"
 #include "libavutil/hwcontext_vaapi.h"
 

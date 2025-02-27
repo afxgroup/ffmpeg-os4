@@ -29,8 +29,13 @@
 #define DUMMY_FILE_SIZE   (100 * 1024 * 1024)
 #define DUMMY_DURATION    600 /* in seconds */
 
+#ifdef __amigaos4__
+#undef TAG_END
+#define TAG_END _TAG_END 
+#endif
+
 enum {
-    TAG_END                          =  0,
+    _TAG_END                         =  0,
     TAG_SHOWFRAME                    =  1,
     TAG_DEFINESHAPE                  =  2,
     TAG_FREECHARACTER                =  3,

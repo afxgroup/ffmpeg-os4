@@ -39,6 +39,10 @@
 #include <stdlib.h>
 #include <string.h>
 
+#ifdef __amigaos4__
+#undef OFFSET
+#endif
+
 #include "attributes.h"
 #include "macros.h"
 

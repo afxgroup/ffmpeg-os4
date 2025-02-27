@@ -376,6 +376,10 @@ av_cold void ff_bwdif_init_filter_line(BWDIFContext *s, int bit_depth)
 #define OFFSET(x) offsetof(YADIFContext, x)
 #define FLAGS AV_OPT_FLAG_VIDEO_PARAM|AV_OPT_FLAG_FILTERING_PARAM
 
+#ifdef __amigaos4__
+#undef CONST
+#endif
+
 #define CONST(name, help, val, unit) { name, help, 0, AV_OPT_TYPE_CONST, {.i64=val}, INT_MIN, INT_MAX, FLAGS, unit }
 
 static const AVOption bwdif_options[] = {
