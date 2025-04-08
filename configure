@@ -5600,8 +5600,8 @@ case $target_os in
         disable symver
         ;;
     amigaos4)
-        add_cppflags -mcrt=clib2 -mstrict-align -gstabs 
-        add_ldflags -mcrt=clib2 -athread=native
+        add_cppflags -mcrt=clib4 -mstrict-align -gstabs
+        add_ldflags -mcrt=clib4 -athread=native
         ;;
     freebsd)
         ;;
